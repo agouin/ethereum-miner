@@ -1,6 +1,6 @@
 # ethereum-miner
 
-### Ethereum Mining GUI, built using [ethminer](https://github.com/ethereum-mining/ethminer)
+### Ethereum Mining GUI, built using [Electron](https://electronjs.org/) and [ethminer](https://github.com/ethereum-mining/ethminer)
 
 **Clone and run or visit [Releases](https://github.com/agouin25/ethereum-miner/releases) to Download**
 
@@ -11,6 +11,6 @@
 npm i
 # Run the app
 npm start
-# Package the app
+# Package the app (from respective platform)
 npm run package
 ```

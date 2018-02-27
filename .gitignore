@@ -1,2 +1,6 @@
 node_modules/
 config.json
+ethereum-miner-win32-x64/
+ethereum-miner-win32-x64*
+ethereum-miner-linux-x64/
+ethereum-miner-linux-x64*

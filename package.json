@@ -19,7 +19,7 @@
     "app"
   ],
   "author": "agouin25",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "devDependencies": {},
   "dependencies": {
     "auto-launch": "^5.0.5",
