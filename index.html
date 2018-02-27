@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ethereum Miner</title>
+  <link href="./css/mui.min.css" rel="stylesheet" type="text/css" />
+  <link href="./css/index.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div class="mui-container">
+    <div class="mui-panel">
+      <h1>
+        <img src='./img/ethereum.png' id='icon'>Ethereum Miner</h1>
+      <div class="mui--text-display3" id="total"></div>
+      <div class="mui--text-display2" id="totalShares"></div>
+      <div class="mui-row">
+        <div class="mui-col-xs-12 mui-col-md-6">
+          <div class="mui-textfield">
+            <input type="text" id="wallet" placeholder="wallet address 0x...">
+            <label>Wallet Address</label>
+          </div>
+        </div>
+        <div class="mui-col-xs-12 mui-col-md-6">
+          <div class="mui-textfield">
+            <input placeholder="Rig0" type="text" id="workerName">
+            <label>Worker Name</label>
+          </div>
+        </div>
+      </div>
+      <div class="mui-row">
+        <div class="mui-col-xs-12 mui-col-md-6">
+          <div class="mui-textfield">
+            <input type="text" id="stratum" placeholder="us1.ethermine.org:4444">
+            <label>Stratum Server Address</label>
+          </div>
+        </div>
+        <div class="mui-col-xs-12 mui-col-md-6">
+          <div class="mui-textfield">
+            <input type="text" id="failoverStratum" placeholder="us2.ethermine.org:4444">
+            <label>Failover Stratum Address (optional)</label>
+          </div>
+        </div>
+      </div>
+      <div class="mui-checkbox">
+        <label>
+          <input type="checkbox" id='autoStart'> Auto start
+        </label>
+      </div>
+      <button class="mui-btn mui-btn--primary" id='start' onClick='renderer.start();'>Start</button>
+      <button class="mui-btn mui-btn--danger" id='stop' style='display:none;' ; onClick='renderer.stop();'>Stop</button>
+      <button class="mui-btn mui-btn--primary" id='save' onClick='renderer.save();'>Save</button>
+
+    </div>
+  </div>
+  <div class='mui-panel' id='tablePanel'>
+    <table class='mui-table mui-table--bordered' id='deviceTable'>
+    </table>
+  </div>
+  <script>
+    const renderer = require('./renderer.js')
+    const mui = require('./js/mui.min.js')
+  </script>
+</body>
+
+</html>

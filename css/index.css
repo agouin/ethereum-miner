@@ -1,0 +1,53 @@
+body {
+    background-color: #eee;
+    color: #555;
+}
+.mine {
+    width: 150px;
+}
+#total {
+    float:right;
+    margin-top: -56px;
+    width: 100%;
+    text-align: right;
+}
+#totalShares {
+    float:right;
+    margin-top:0px;
+    margin-bottom: 20px; 
+    width:100%;
+    text-align: right;
+    
+}
+td>.mui-select {
+    padding-top:0px!important;
+    margin-bottom:0px!important;
+}
+td {
+    padding:0px!important;
+    padding-left:10px!important;
+}
+#icon {
+    float:left;
+    margin-top:-3px;
+    margin-right:10px;
+    width:30px;
+}
+.mui-btn--primary {
+    background-color: #4e69b8!important;
+}
+.mui-btn--danger {
+    background-color: #9a0000!important;
+}
+@media(max-width: 768px) {
+    #total{
+        margin-top: 0px!important;
+        margin-left:22px;
+    }
+    #totalShares{
+        margin-left:56px;
+    }
+    #tablePanel {
+        overflow-x: scroll;
+    }
+}
