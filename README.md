@@ -11,6 +11,6 @@
 npm i
 # Run the app
 npm start
-# Package the app (from respective platform)
+# Package the app
 npm run package
 ```
