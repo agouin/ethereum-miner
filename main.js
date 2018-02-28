@@ -283,7 +283,7 @@ function incrementHashrateInstance() {
 
 function reportHashrate(platformID, deviceID, hashrate, shares) {
   //let now = Date.now();
-  console.log('report hashrate', hashrate, 'platformID', platformID, 'deviceID', deviceID, shares );
+  //console.log('report hashrate', hashrate, 'platformID', platformID, 'deviceID', deviceID, shares );
   let ethminerInstance = ethminerInstances[platformID][deviceID];
   if (shares) {
     ethminerInstance.shares = shares;
