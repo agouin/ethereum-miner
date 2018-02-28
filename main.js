@@ -240,6 +240,7 @@ async function restartInstance(platformID, deviceID) {
   if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
   let gpu = gpus[platformID][deviceID];
   if (!gpu) return;
+  gpu.hashrate = "Restarting";
   let ethminerInstance = ethminerInstances[platformID][deviceID];
   if (!ethminerInstance) return;
   let { deviceName, mine } = gpu;
