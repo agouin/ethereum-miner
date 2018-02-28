@@ -1,6 +1,6 @@
 {
   "name": "ethereum-miner",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A minimal Ethereum miner GUI using ethminer",
   "main": "main.js",
   "scripts": {
