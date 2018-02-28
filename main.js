@@ -238,14 +238,15 @@ function checkInstanceHealth() {
 async function restartInstance(platformID, deviceID) {
   if (platformID >= ethminerInstances.length || deviceID >= ethminerInstances[platformID].length) return;
   if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
-  let ethminerInstance = ethminerInstances[platformID][deviceID];
-  if (!ethminerInstance) return;
   let gpu = gpus[platformID][deviceID];
   if (!gpu) return;
+  let ethminerInstance = ethminerInstances[platformID][deviceID];
+  if (!ethminerInstance) return;
   let { deviceName, mine } = gpu;
   let { instance } = ethminerInstance;
-  if (!instance || !instance.kill) return;
-  await instance.kill();
+  if (instance && instance.kill) {
+    await instance.kill();
+  }
   setTimeout(function(){
     startMining(platformID,deviceID, deviceName, mine);
   }, 2000);
