@@ -307,7 +307,6 @@ function checkState() {
     if (numberMining == 0) return;
     if (allOff) {
         curState = State.OFF;
-        if (ipcRenderer) ipcRenderer.send('stop');
         document.getElementById('start').innerHTML = "Start";
         document.getElementById('stop').style.display = 'none';
         document.getElementById('start').removeAttribute('disabled');
@@ -318,7 +317,6 @@ function checkState() {
         document.getElementById('stop').style.display = 'inline';
         document.getElementById('start').removeAttribute('disabled');
     }
-
 }
 
 function stop() {
