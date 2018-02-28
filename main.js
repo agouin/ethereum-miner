@@ -475,10 +475,12 @@ let shouldKill = false;
 let saveTimeout;
 function createWindow() {
   // Create the browser window.
+  let iconPath = path.resolve(__dirname,`./img/ethereum.${ os.platform() == 'win32' ? 'ico' : os.platform() == 'darwin' ? 'icns': 'png' }`);
+  console.log('icon path', iconPath);
   mainWindow = new BrowserWindow({
     width: config[Config.WIDTH] || 1200,
     height: config[Config.HEIGHT] || 900,
-    icon: `./img/ethereum.${os.platform() == 'win32' ? 'ico' : 'icns'}`
+    icon: iconPath
   })
   mainWindow.on('resize', (e) => {
     let size = mainWindow.getSize();
