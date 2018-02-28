@@ -134,8 +134,8 @@ ipcMain.on('off', (event, data) => {
   if (platformID >= ethminerInstances.length || deviceID >= ethminerInstances[platformID].length) return;
   let gpu = gpus[platformID][deviceID];
   let ethminerInstance = ethminerInstances[platformID][deviceID];
-  delete ethminerInstance.hashrate;
-  delete ethminerInstance.shares;
+  ethminerInstance.hashrate = "";
+  ethminerInstance.shares = "";
   if (ethminerInstance.instance && ethminerInstance.instance.kill) ethminerInstance.instance.kill('SIGTERM');
   else {
     ipcRenderer.send('state', {
@@ -240,9 +240,9 @@ async function restartInstance(platformID, deviceID) {
   if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
   let gpu = gpus[platformID][deviceID];
   if (!gpu) return;
-  gpu.hashrate = "Restarting";
   let ethminerInstance = ethminerInstances[platformID][deviceID];
   if (!ethminerInstance) return;
+  ethminerInstance.hashrate = "Restarting";
   let { deviceName, mine } = gpu;
   let { instance } = ethminerInstance;
   if (instance && instance.kill) {
