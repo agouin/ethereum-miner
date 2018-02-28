@@ -100,9 +100,24 @@ ipcRenderer.on('init', (event, data) => {
                         return;
                     }
                     delete gpus[platformID][deviceID].restarts;
-                    gpu.manualElement.setAttribute('disabled', 'disabled');
+                    
                     switch (gpu.state) {
                         case State.OFF:
+                            let wallet = document.getElementById("wallet").value;
+                            let workerName = document.getElementById("workerName").value;
+                            let stratum = document.getElementById('stratum').value;
+                            if (!wallet || wallet == "") {
+                                ipcRenderer.send('dialog', 'No wallet entered');
+                                return;
+                            }
+                            if (!workerName || workerName == "") {
+                                ipcRenderer.send('dialog', 'No worker name entered');
+                                return;
+                            }
+                            if (!stratum || stratum == "") {
+                                ipcRenderer.send('dialog', 'No stratum address entered');
+                                return;
+                            }
                             gpu.manualElement.innerHTML = "Turning On";
 			    curState = State.ON;
                             ipcRenderer.send('on', { platformID, deviceID, mine: gpu.mine });
@@ -112,7 +127,7 @@ ipcRenderer.on('init', (event, data) => {
                             ipcRenderer.send('off', { platformID, deviceID });
                             break;
                     }
-
+                    gpu.manualElement.setAttribute('disabled', 'disabled');
                     if (gpu.restartsElement)
                         gpu.restartsElement.innerHTML = "";
                 });
@@ -209,6 +224,21 @@ ipcRenderer.on('hashrate', (event, stats) => {
 ipcRenderer.send('init');
 
 function start() {
+    let wallet = document.getElementById("wallet").value;
+    let workerName = document.getElementById("workerName").value;
+    let stratum = document.getElementById('stratum').value;
+    if (!wallet || wallet == "") {
+        ipcRenderer.send('dialog', 'No wallet entered');
+        return;
+    }
+    if (!workerName || workerName == "") {
+        ipcRenderer.send('dialog', 'No worker name entered');
+        return;
+    }
+    if (!stratum || stratum == "") {
+        ipcRenderer.send('dialog', 'No stratum address entered');
+        return;
+    }
     document.getElementById('start').setAttribute('disabled', 'disabled');
     let devicesStarting = 0;
     for (i = 0; i < gpus.length; i++) {
@@ -228,9 +258,9 @@ function start() {
     }
     ipcRenderer.send('start', {
         gpus,
-        wallet: document.getElementById("wallet").value,
-        workerName: document.getElementById("workerName").value,
-        stratum: document.getElementById('stratum').value,
+        wallet,
+        workerName,
+        stratum,
         failoverStratum: document.getElementById('failoverStratum').value,
         autoStart: document.getElementById('autoStart').checked
     });
@@ -334,4 +364,3 @@ function save() {
 exports.start = start;
 exports.stop = stop;
 exports.save = save;
-exports.State = State;
