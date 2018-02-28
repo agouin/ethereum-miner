@@ -19,7 +19,11 @@ var autoLauncher = new AutoLaunch({
 var config;
 const configPath = './config.json';
 if (fs.existsSync(configPath) && (file = fs.readFileSync(configPath)) != null) {
-  config = JSON.parse(file);
+  try {
+    config = JSON.parse(file);
+  } catch(x) {
+    config = {};
+  }
 } else {
   config = {};
 }
@@ -189,7 +193,7 @@ ipcMain.on('start', (event, data) => {
         if (mine) {
           setTimeout(function () {
             startMining(platformID, deviceID, deviceName, mine);
-          }, count * 20000);
+          }, count * 20000 + 500);
           count++;
         } else {
           // since mine doesn't exist will fire notification
@@ -238,11 +242,12 @@ function startBroadcastingHashrates() {
 }
 function stopBroadcastingHashrates() {
   clearInterval(broadcastHashrateInterval);
+  broadcastHashrateInterval = null;
 }
 var lastPlatformID = 0;
 var lastDeviceID = 0;
 function broadcastHashrate() {
-  if (ethminerInstances.length <= lastPlatformID || ethminerInstances[lastPlatformID].length <= lastDeviceID) {
+  if (ethminerInstances.length <= lastPlatformID || ethminerInstances[lastPlatformID] == null || ethminerInstances[lastPlatformID].length <= lastDeviceID) {
     incrementHashrateInstance();
     return;
   }
@@ -265,7 +270,9 @@ function broadcastHashrate() {
 }
 
 function incrementHashrateInstance() {
-  if (lastPlatformID >= ethminerInstances.length) return;
+  if (lastPlatformID >= ethminerInstances.length) {
+    return;
+  }
   let nextDeviceID = lastDeviceID + 1
   if (nextDeviceID < ethminerInstances[lastPlatformID].length) {
     lastDeviceID = nextDeviceID;
@@ -301,7 +308,7 @@ function reportHashrate(platformID, deviceID, hashrate, shares) {
 }
 
 function startMining(platformID, deviceID, deviceName, mine) {
-  //console.log('start mining', deviceName, 'mine', mine);
+  //console.log('start mining', deviceName, 'mine', mine, platformID, deviceID);
   if (!mine) {
     if (ipcRenderer)
       ipcRenderer.send('state', {
@@ -309,6 +316,7 @@ function startMining(platformID, deviceID, deviceName, mine) {
         deviceID,
         nextState: State.ON
       });
+      //console.log('mine not enabled', platformID, deviceID);
     return;
   }
   if (platformID < ethminerInstances.length && deviceID < ethminerInstances[platformID].length) {
@@ -336,10 +344,9 @@ function startMining(platformID, deviceID, deviceName, mine) {
   const ethminerInstance = spawn(ethminer, args);
   ethminerInstance.stdout.on('data', (data) => {
     if (shouldKill) return;
-    //console.log(`stdout: ${data}`);
     //WTF, CUDA progress comes in through stdout, but everything else goes to stderr
     let dataString = stripAnsi(data.toString());
-    //console.log(dataString);
+    //console.log(`stdout: ${dataString}`);
     const cudaRegex = /CUDA#(\d+):\s(\d+)%/g;
     let cudaMatches = dataString.match(cudaRegex);
     if (cudaMatches && cudaMatches.length == 1) {
@@ -352,7 +359,7 @@ function startMining(platformID, deviceID, deviceName, mine) {
     // ethminer sends progress through stderr for some odd reason
 
     let dataString = stripAnsi(data.toString());
-    //console.log(dataString);
+    //console.log(`stderr: ${dataString}`);
     const dagRegex = /DAG\s(\d+)\s%/g;
     let dagMatches = dataString.match(dagRegex);
     if (dagMatches && dagMatches.length == 1) {
@@ -388,9 +395,7 @@ function startMining(platformID, deviceID, deviceName, mine) {
   });
   while (ethminerInstances.length <= platformID) ethminerInstances.push([]);
   while (ethminerInstances[platformID].length <= deviceID) ethminerInstances[platformID].push({});
-  ethminerInstances[platformID][deviceID] = { instance: ethminerInstance, lastActivity: Date.now(), platformID, deviceID, restartCount: 0 };
-  lastPlatformID = platformID;
-  lastDeviceID = deviceID;
+  ethminerInstances[platformID][deviceID] = { instance: ethminerInstance, lastActivity: Date.now(), platformID, deviceID, restartCount: 0, hashrate: 0 };
   if (ipcRenderer)
     ipcRenderer.send('state', {
       platformID,
@@ -436,6 +441,8 @@ async function listDevices() {
     }
     while (gpus.length <= platformID) gpus.push([]);
     while (gpus[platformID].length <= deviceID) gpus[platformID].push({});
+    while (ethminerInstances.length <= platformID) ethminerInstances.push([]);
+    while (ethminerInstances[platformID].length <= deviceID) ethminerInstances[platformID].push({});
     gpus[platformID][deviceID] = {
       platformID,
       deviceID,
