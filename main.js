@@ -243,11 +243,14 @@ var lastPlatformID = 0;
 var lastDeviceID = 0;
 function broadcastHashrate() {
   if (ethminerInstances.length <= lastPlatformID || ethminerInstances[lastPlatformID].length <= lastDeviceID) {
-    lastPlatformID = 0;
-    lastDeviceID = 0;
+    incrementHashrateInstance();
     return;
   }
   let ethminerInstance = ethminerInstances[lastPlatformID][lastDeviceID];
+  if (!ethminerInstance) {
+    incrementHashrateInstance();
+    return;
+  }
   let { hashrate, shares } = ethminerInstance;
   if (hashrate && ipcRenderer) {
     //console.log(`broadcasted hashrate for platformID: ${lastPlatformID}, deviceID: ${lastDeviceID}, hashrate: ${hashrate}, shares: ${shares}`);
@@ -258,9 +261,11 @@ function broadcastHashrate() {
       shares: shares
     });
   }
-  //else console.log('skipping');
+  incrementHashrateInstance();
+}
 
-
+function incrementHashrateInstance() {
+  if (lastPlatformID >= ethminerInstances.length) return;
   let nextDeviceID = lastDeviceID + 1
   if (nextDeviceID < ethminerInstances[lastPlatformID].length) {
     lastDeviceID = nextDeviceID;
@@ -278,17 +283,20 @@ function broadcastHashrate() {
 
 function reportHashrate(platformID, deviceID, hashrate, shares) {
   //let now = Date.now();
+  console.log('report hashrate', hashrate, 'platformID', platformID, 'deviceID', deviceID, shares );
   let ethminerInstance = ethminerInstances[platformID][deviceID];
   if (shares) {
     ethminerInstance.shares = shares;
   }
-  if (hashrate) {
+  if (hashrate && hashrate != "0.00 Mh/s") {
     let floatHashrate = parseFloat(hashrate);
-    if (floatHashrate) ethminerInstance.hashrate = floatHashrate;
+    if (floatHashrate) {
+      if (floatHashrate != 0) {
+        ethminerInstance.lastActivity = Date.now();
+        ethminerInstance.hashrate = floatHashrate;
+      }
+    }
     else ethminerInstance.hashrate = hashrate;
-
-    if (hashrate != "0.00 Mh/s")
-      ethminerInstance.lastActivity = Date.now();
   }
 }
 
@@ -381,6 +389,8 @@ function startMining(platformID, deviceID, deviceName, mine) {
   while (ethminerInstances.length <= platformID) ethminerInstances.push([]);
   while (ethminerInstances[platformID].length <= deviceID) ethminerInstances[platformID].push({});
   ethminerInstances[platformID][deviceID] = { instance: ethminerInstance, lastActivity: Date.now(), platformID, deviceID, restartCount: 0 };
+  lastPlatformID = platformID;
+  lastDeviceID = deviceID;
   if (ipcRenderer)
     ipcRenderer.send('state', {
       platformID,
@@ -486,7 +496,7 @@ app.on('window-all-closed', async function () {
   if (process.platform !== 'darwin') {
     shouldKill = true;
     await killAllEthminers('SIGTERM');
-    setTimeout(app.quit, 5000);
+    app.quit();
   }
 })
 
