@@ -95,7 +95,7 @@ api.get('/', (req, res) => {
       totalRejected2 += parseInt(rejectedSplit[1]);
       totalFound += parseInt(split[2].replace('F', ''));
       let floatHashrate = parseFloat(hashrate);
-      if (floatHashrate && !floatHashrate.isNaN()) hashrate += floatHashrate;
+      if (floatHashrate && !isNaN(floatHashrate)) hashrate += floatHashrate;
     }
   }
   res.send({
