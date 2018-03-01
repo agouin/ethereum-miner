@@ -880,7 +880,11 @@ function createWindow() {
     }
   ];
 
-  mainWindow.setMenu(Menu.buildFromTemplate(template));
+  if (process.platform == 'darwin') {
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+  } else {
+    mainWindow.setMenu(Menu.buildFromTemplate(template));
+  }
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools()
