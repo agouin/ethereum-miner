@@ -5,10 +5,10 @@
 - Windows/mac/linux
 - AMD and NVIDIA
 - Hashrate and Shares monitoring of each GPU
-- Cascaded launch sequence
-- Auto restart GPUs* 
-- Auto start with program launch
 - Manual control of each GPU
+- Cascaded launch sequence
+- Auto restart GPUs*
+- Auto start with program launch
 - No Donation
 
 ## To Use
