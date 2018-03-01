@@ -262,7 +262,7 @@ ipcMain.on('disableWorker', (event, workerName) => {
 });
 
 function save() {
-  fs.writeFile(configPath, JSON.stringify(config), function(err) {
+  fs.writeFile(configPath, JSON.stringify(config), function (err) {
     if (err) {
       console.log('error saving config');
     } else {
@@ -274,14 +274,14 @@ function save() {
 function setAutoLaunch(enabled) {
   autoLauncher
     .isEnabled()
-    .then(function(isEnabled) {
+    .then(function (isEnabled) {
       if (isEnabled && !enabled) {
         autoLauncher.disable();
       } else if (!isEnabled && enabled) {
         autoLauncher.enable();
       }
     })
-    .catch(function(err) {
+    .catch(function (err) {
       console.log('error getting auto launch');
     });
 }
@@ -438,7 +438,7 @@ ipcMain.on('start', (event, data) => {
         if (mine) {
           initializeEthminerInstances(platformID, deviceID);
           ethminerInstances[platformID][deviceID].startTimeout = setTimeout(
-            function() {
+            function () {
               startMining(platformID, deviceID, deviceName, mine);
             },
             count * 20000 + 500
@@ -512,7 +512,7 @@ async function restartInstance(platformID, deviceID) {
     await instance.kill('SIGTERM');
     delete ethminerInstance.instance;
   }
-  setTimeout(function() {
+  setTimeout(function () {
     startMining(platformID, deviceID, deviceName, mine);
   }, 2000);
 }
@@ -770,9 +770,9 @@ function createWindow() {
   let iconPath = path.resolve(
     __dirname,
     `./img/ethereum.${
-      os.platform() == 'win32'
-        ? 'ico'
-        : os.platform() == 'darwin' ? 'icns' : 'png'
+    os.platform() == 'win32'
+      ? 'ico'
+      : os.platform() == 'darwin' ? 'icns' : 'png'
     }`
   );
   // console.log('icon path', iconPath);
@@ -825,7 +825,7 @@ function createWindow() {
         {
           label: 'Quit',
           accelerator: 'Command+Q',
-          click: function() {
+          click: function () {
             app.quit();
           }
         }
@@ -845,8 +845,12 @@ function createWindow() {
               icon: iconPath
             });
             clusterMonitor.setMenu(Menu.buildFromTemplate([editMenu]));
-            clusterMonitor.loadURL(path.join(__dirname, 'cluster.html'));
-            clusterMonitor.webContents.openDevTools();
+            clusterMonitor.loadURL(url.format({
+              pathname: path.join(__dirname, 'cluster.html'),
+              protocol: 'file:',
+              slashes: true
+            }));
+            //clusterMonitor.webContents.openDevTools();
             clusterMonitor.on('closed', () => {
               stopFetchingCluster();
               ipcClusterMonitor = null;
@@ -882,7 +886,7 @@ function createWindow() {
   //mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
+  mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
@@ -893,13 +897,13 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function() {
+app.on('ready', function () {
   createWindow();
   listDevices();
 });
 
 // Quit when all windows are closed.
-app.on('window-all-closed', async function() {
+app.on('window-all-closed', async function () {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== 'darwin') {
@@ -909,7 +913,7 @@ app.on('window-all-closed', async function() {
   //}
 });
 
-app.on('activate', function() {
+app.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
