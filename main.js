@@ -13,7 +13,7 @@ const { State } = require('./utils.js');
 const appName = (os.platform() == 'win32') ? 'ethereum-miner.exe' : (os.platform() == 'darwin') ? 'ethereum-miner.app' : 'ethereum-miner';
 var autoLauncher = new AutoLaunch({
   name: 'EthereumMiner',
-  path: path.join(__dirname, appName)
+  path: app.getPath('exe')
 });
 var config;
 const configPath = path.resolve(app.getPath('userData'), './config.json');
