@@ -22,7 +22,7 @@
             <input type="text" id="workerAddress" placeholder="http://192.168.1.5:5025">
             <label>Address</label>
           </div>
-          <button class="mui-btn mui-btn--primary">Add</button>
+          <button class="mui-btn mui-btn--primary" onClick="addWorker();">Add</button>
         </div>
       </div>
     </div>
@@ -32,9 +32,10 @@
     </div>
     <script>
       const { ipcRenderer } = require('electron');
+      var workers = {};
       function addWorker() {
         let address = document.getElementById('workerAddress').value;
-        if (value == "") {
+        if (address == "") {
           ipcRenderer.send('dialog', 'No address entered');
           return;
         }
@@ -43,16 +44,65 @@
       ipcRenderer.send('initClusterMonitor');
       ipcRenderer.on('update', (event, data) => {
         if (!data) return;
-        let { workerName, hashrate, shares } = data;
-        document.getElementById(`hashrate${workerName}`).innerHTML = hashrate;
-        document.getElementById(`shares${workerName}`).innerHTML = shares;
+        let { workerName, hashrate, totalAccepted, totalAccepted2, totalRejected, totalRejected2, totalFound } = data;
+        if (!workerName) return;
+        workers[workerName].hashrate = hashrate;
+        workers[workerName].totalAccepted = totalAccepted;
+        workers[workerName].totalAccepted2 = totalAccepted2;
+        workers[workerName].totalRejected = totalRejected;
+        workers[workerName].totalRejected2 = totalAccepted2;
+        let hashrateElement = document.getElementById(`hashrate${workerName}`)
+        if (hashrateElement) hashrateElement.innerHTML = hashrate;
+        let sharesElement = document.getElementById(`shares${workerName}`);
+        if (sharesElement) sharesElement.innerHTML = `A${totalAccepted}+${totalAccepted2}:R${totalRejected}+${totalRejected2}:F${totalFound}`;
+        calculateTotal();
       });
+
+      function calculateTotal() {
+        let keys = Object.keys(workers);
+        var total = 0;
+        var totalAccepted = 0, totalAccepted2 = 0, totalRejected = 0, totalRejected2 = 0, totalFound = 0;
+        for (i = 0; i < keys.length / 2; i++) {
+          let workerName = keys[i];
+          let worker = workers[workerName];
+          if (worker.hashrate && !worker.hashrate.isNaN()) total += worker.hashrate;
+          if (worker.totalAccepted) totalAccepted += worker.totalAccepted;
+          if (worker.totalAccepted2) totalAccepted2 += worker.totalAccepted2;
+          if (worker.totalRejected) totalRejected += worker.totalRejected;
+          if (worker.totalRejected2) totalRejected2 += worker.totalRejected2;
+          if (worker.totalFound) totalFound += worker.totalFound;
+        }
+        document.getElementById('total').style.display = 'block';
+        document.getElementById('total').innerHTML = `${total} Mh/s`;
+        document.getElementById('totalShares').style.display = 'block';
+        document.getElementById('totalShares').innerHTML = `A${totalAccepted}+${totalAccepted2}:R${totalRejected}+${totalRejected2}:F${totalFound}`;
+      }
+
+      function deleteWorker(event) {
+        if (!event || !event.target) return;
+        let workerName = event.target.getAttribute("workerName");
+        ipcRenderer.send('deleteWorker', workerName);
+      }
+
+      function disableWorker(event) {
+        if (!event || !event.target) return;
+        event.target.setAttribute('disabled', 'disabled');
+        let workerName = event.target.getAttribute("workerName");
+        ipcRenderer.send('disableWorker', workerName);
+        let hashrateElement = document.getElementById(`hashrate${workerName}`)
+        if (hashrateElement) hashrateElement.innerHTML = "";
+        let sharesElement = document.getElementById(`shares${workerName}`);
+        if (sharesElement) sharesElement.innerHTML = "";
+        ipcRenderer.send('disableWorker', workerName);
+      }
+
       ipcRenderer.on('cluster', (event, data) => {
-        var clusterTable = `<tr><th>Worker Name</th><th>Address</th><th>Hashrate</th><th>Shares</th></tr>`;
+        var clusterTable = `<tr><th>Worker Name</th><th>Address</th><th>Hashrate</th><th>Shares</th><th>Delete</th><th>Disable</th></tr>`;
         if (data) {
           for (i = 0; i < data.length; i++) {
             let { workerName, address } = data[i];
-            clusterTable += `<tr><td>${workerName}</td><td>${address}</td><td id='hashrate${workerName}'></td><td id='shares${workerName}'></td></tr>`;
+            workers[workerName] = {};
+            clusterTable += `<tr><td>${workerName}</td><td>${address}</td><td id='hashrate${workerName}'></td><td id='shares${workerName}'></td><td><button class="mui-btn mui-btn--danger" workerName='${workerName}' onClick="return deleteWorker(event);">Delete</button></td><td><button class="mui-btn mui-btn--primary"  workerName='${workerName}' onClick="return disableWorker(event);">Disable</button></td></tr>`;
           }
         }
         document.getElementById('clusterTable').innerHTML = clusterTable;
