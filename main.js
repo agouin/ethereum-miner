@@ -1,5 +1,5 @@
 const electron = require('electron')
-const { dialog, Menu, MenuItem } = require('electron');
+const { dialog, Menu, MenuItem, app } = require('electron');
 const fs = require('fs');
 const { spawn, execSync } = require('child_process');
 const path = require('path')
@@ -17,7 +17,7 @@ var autoLauncher = new AutoLaunch({
   path: path.join(__dirname, appName)
 });
 var config;
-const configPath = path.resolve(__dirname, './config.json');
+const configPath = path.resolve(app.getPath('userData'), './config.json');
 if (fs.existsSync(configPath) && (file = fs.readFileSync(configPath)) != null) {
   try {
     config = JSON.parse(file);
@@ -48,8 +48,6 @@ function save() {
   });
 }
 
-// Module to control application life.
-const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 const gpus = [];
