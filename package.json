@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package": "electron-packager . ethereum-miner --overwrite --icon=./img/ethereum --ignore='config.js'"
+    "package":
+      "electron-packager . ethereum-miner --overwrite --icon=./img/ethereum"
   },
   "repository": "https://github.com/agouin25/ethereum-miner",
   "keywords": [
@@ -23,8 +24,11 @@
   "devDependencies": {},
   "dependencies": {
     "auto-launch": "^5.0.5",
+    "body-parser": "^1.18.2",
     "electron": "^1.8.2",
     "electron-packager": "^10.1.1",
+    "express": "^4.16.2",
+    "request": "^2.83.0",
     "strip-ansi": "^4.0.0",
     "util.promisify": "^1.0.0"
   }
