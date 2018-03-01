@@ -443,11 +443,11 @@ let mainWindow
 
 async function listDevices() {
   gpus.length = 0;
-  const result = execSync(`${ethminer} --list-devices`).toString();
+  const result = stripAnsi(execSync(`${ethminer} --list-devices`).toString());
   var devicesRegex = /\[(\d+)\].\[(\d+)\].*/g;
   var devices = result.match(devicesRegex);
   var numbersRegex = /\d+/g
-  var memorySizeRegex = /(?:CL_DEVICE_MAX_MEM_ALLOC_SIZE:\s)(\d+)/g;
+  var memorySizeRegex = /(?:CL_DEVICE_GLOBAL_MEM_SIZE:\s)(\d+)/g;
   let memorySizes = [];
   while ((memorySizeMatch = memorySizeRegex.exec(result)) != null) {
     memorySizes.push(memorySizeMatch[1]);
@@ -490,7 +490,7 @@ let saveTimeout;
 function createWindow() {
   // Create the browser window.
   let iconPath = path.resolve(__dirname,`./img/ethereum.${ os.platform() == 'win32' ? 'ico' : os.platform() == 'darwin' ? 'icns': 'png' }`);
-  console.log('icon path', iconPath);
+  // console.log('icon path', iconPath);
   mainWindow = new BrowserWindow({
     width: config[Config.WIDTH] || 1200,
     height: config[Config.HEIGHT] || 900,
