@@ -73,7 +73,7 @@
           if (worker.totalFound) totalFound += worker.totalFound;
         }
         document.getElementById('total').style.display = 'block';
-        document.getElementById('total').innerHTML = `${total} Mh/s`;
+        document.getElementById('total').innerHTML = `${total.toFixed(2)} Mh/s`;
         document.getElementById('totalShares').style.display = 'block';
         document.getElementById('totalShares').innerHTML = `A${totalAccepted}+${totalAccepted2}:R${totalRejected}+${totalRejected2}:F${totalFound}`;
       }

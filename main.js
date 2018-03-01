@@ -68,7 +68,7 @@ const request = require('request');
 
 api.get('/', (req, res) => {
   var hashrates = [];
-  var hashrate = 0;
+  var totalHashrate = 0.0;
   var totalAccepted = 0,
     totalAccepted2 = 0,
     totalRejected = 0,
@@ -81,6 +81,8 @@ api.get('/', (req, res) => {
       let ethminerInstance = ethminerInstances[i][j];
       let { hashrate, shares } = ethminerInstance;
       hashrates[i][j].hashrate = hashrate;
+      let floatHashrate = parseFloat(hashrate);
+      if (!isNaN(floatHashrate)) totalHashrate += floatHashrate;
       hashrates[i][j].shares = shares;
       if (!shares) continue;
       let split = shares.split(':');
@@ -94,13 +96,11 @@ api.get('/', (req, res) => {
       totalRejected += parseInt(rejectedSplit[0]);
       totalRejected2 += parseInt(rejectedSplit[1]);
       totalFound += parseInt(split[2].replace('F', ''));
-      let floatHashrate = parseFloat(hashrate);
-      if (floatHashrate && !isNaN(floatHashrate)) hashrate += floatHashrate;
     }
   }
   res.send({
     hashrates,
-    hashrate,
+    hashrate: totalHashrate,
     workerName: config[Config.WORKER_NAME],
     totalAccepted,
     totalAccepted2,
