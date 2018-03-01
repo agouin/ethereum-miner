@@ -52,7 +52,14 @@
         workers[workerName].totalRejected = totalRejected;
         workers[workerName].totalRejected2 = totalAccepted2;
         let hashrateElement = document.getElementById(`hashrate${workerName}`)
-        if (hashrateElement) hashrateElement.innerHTML = hashrate;
+        if (hashrateElement) {
+          let floatHashrate = parseFloat(hashrate);
+          if (!isNaN(floatHashrate)){
+            hashrateElement.innerHTML = floatHashrate.toFixed(2);
+          } else {
+            hashrateElement.innerHTML = hashrate;
+          }
+        }
         let sharesElement = document.getElementById(`shares${workerName}`);
         if (sharesElement) sharesElement.innerHTML = `A${totalAccepted}+${totalAccepted2}:R${totalRejected}+${totalRejected2}:F${totalFound}`;
         calculateTotal();
@@ -62,7 +69,7 @@
         let keys = Object.keys(workers);
         var total = 0;
         var totalAccepted = 0, totalAccepted2 = 0, totalRejected = 0, totalRejected2 = 0, totalFound = 0;
-        for (i = 0; i < keys.length / 2; i++) {
+        for (i = 0; i < keys.length; i++) {
           let workerName = keys[i];
           let worker = workers[workerName];
           if (worker.hashrate && !isNaN(worker.hashrate)) total += worker.hashrate;
