@@ -2,6 +2,7 @@
 ###### Built using [electron](https://electronjs.org/) and [ethminer](https://github.com/ethereum-mining/ethminer)
 
 ## Features
+- Windows/mac/linux
 - AMD and NVIDIA
 - Hashrate and Shares monitoring of each GPU
 - Cascaded launch sequence
