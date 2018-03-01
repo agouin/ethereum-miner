@@ -86,7 +86,11 @@ ipcMain.on('init', (event) => {
 async function killAllEthminers(signal) {
   for (i = 0; i < ethminerInstances.length; i++) {
     for (j = 0; j < ethminerInstances[i].length; j++) {
-      if (ethminerInstances[i][j] && ethminerInstances[i][j].instance && ethminerInstances[i][j].instance.kill && ethminerInstances[i][j].instance.stdout && ethminerInstances[i][j].instance.stderr) {
+      if (ethminerInstances[i][j].startTimeout) {
+        //console.log('start timeout cleared', i, j);
+        clearTimeout(ethminerInstances[i][j].startTimeout);
+      }
+      if (ethminerInstances[i][j].instance && ethminerInstances[i][j].instance.kill && ethminerInstances[i][j].instance.stdout && ethminerInstances[i][j].instance.stderr) {
         await ethminerInstances[i][j].instance.stdout.removeAllListeners('data');
         await ethminerInstances[i][j].instance.stderr.removeAllListeners('data');
         await ethminerInstances[i][j].instance.removeAllListeners('close');
@@ -116,7 +120,7 @@ ipcMain.on('on', (event, data) => {
   if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
   if (platformID < ethminerInstances.length && deviceID < ethminerInstances[platformID].length) {
     let ethminerInstance = ethminerInstances[platformID][deviceID];
-    if (ethminerInstance.instance && !ethminerInstance.instance.killed && ethminerInstance.instance.connected) {
+    if (ethminerInstance.instance) {
       console.log('gpu already on');
       return;
     }
@@ -128,7 +132,7 @@ ipcMain.on('on', (event, data) => {
   startMining(platformID, deviceID, gpu.deviceName, mine);
 });
 
-ipcMain.on('off', (event, data) => {
+ipcMain.on('off', async (event, data) => {
   let { platformID, deviceID } = data;
   if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
   if (platformID >= ethminerInstances.length || deviceID >= ethminerInstances[platformID].length) return;
@@ -136,8 +140,11 @@ ipcMain.on('off', (event, data) => {
   let ethminerInstance = ethminerInstances[platformID][deviceID];
   ethminerInstance.hashrate = "";
   ethminerInstance.shares = "";
-  if (ethminerInstance.instance && ethminerInstance.instance.kill) ethminerInstance.instance.kill('SIGTERM');
-  else {
+  ethminerInstance.off = true;
+  if (ethminerInstance.instance && ethminerInstance.instance.kill) {
+    await ethminerInstance.instance.kill('SIGTERM');
+    delete ethminerInstance.instance;
+  } else {
     ipcRenderer.send('state', {
       platformID,
       deviceID,
@@ -179,6 +186,11 @@ ipcMain.on('save', (event, data) => {
   setAutoLaunch(autoStart);
 });
 
+function initializeEthminerInstances(platformID, deviceID) {
+  while (ethminerInstances.length <= platformID) ethminerInstances.push([]);
+  while (ethminerInstances[platformID].length <= deviceID) ethminerInstances[platformID].push({});
+}
+
 ipcMain.on('start', (event, data) => {
   killAllEthminers('SIGTERM');
   let { gpus, wallet, workerName, stratum, failoverStratum, autoStart } = data;
@@ -191,13 +203,14 @@ ipcMain.on('start', (event, data) => {
         if (platform[i].hashrate) delete platform[i].hashrate
         let { platformID, deviceID, deviceName, mine } = platform[i];
         if (mine) {
-          setTimeout(function () {
+          initializeEthminerInstances(platformID, deviceID);
+          ethminerInstances[platformID][deviceID].startTimeout = setTimeout(function () {
             startMining(platformID, deviceID, deviceName, mine);
           }, count * 20000 + 500);
           count++;
         } else {
           // since mine doesn't exist will fire notification
-          startMining(platformID, deviceID, deviceName, mine);
+          //startMining(platformID, deviceID, deviceName, mine);
         }
       }
     }
@@ -220,8 +233,8 @@ function stopCheckingInstances() {
 function checkInstanceHealth() {
   for (i = 0; i < ethminerInstances.length; i++) {
     for (j = 0; j < ethminerInstances[i].length; j++) {
-      let { instance, lastActivity, platformID, deviceID } = ethminerInstances[i][j];
-      if (!instance || !lastActivity) continue;
+      let { instance, lastActivity, platformID, deviceID, off } = ethminerInstances[i][j];
+      if (!lastActivity || off) continue;
       let now = Date.now();
       if (now - lastActivity > 120000) {
         // 2 minutes of inactivity, should restart
@@ -246,7 +259,8 @@ async function restartInstance(platformID, deviceID) {
   let { deviceName, mine } = gpu;
   let { instance } = ethminerInstance;
   if (instance && instance.kill) {
-    await instance.kill();
+    await instance.kill('SIGTERM');
+    delete ethminerInstance.instance;
   }
   setTimeout(function(){
     startMining(platformID,deviceID, deviceName, mine);
@@ -339,7 +353,7 @@ function startMining(platformID, deviceID, deviceName, mine) {
   }
   if (platformID < ethminerInstances.length && deviceID < ethminerInstances[platformID].length) {
     let ethminerInstance = ethminerInstances[platformID][deviceID];
-    if (ethminerInstance && ethminerInstance.instance && ethminerInstance.instance.connected) {
+    if (ethminerInstance && ethminerInstance.instance) {
       console.log('already mining on that gpu');
       return;
     }

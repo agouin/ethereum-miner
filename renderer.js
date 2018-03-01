@@ -121,6 +121,14 @@ ipcRenderer.on('init', (event, data) => {
                             gpu.manualElement.innerHTML = "Turning On";
 			    curState = State.ON;
                             ipcRenderer.send('on', { platformID, deviceID, mine: gpu.mine });
+                            if (totalHashrateElement) { 
+                                totalHashrateElement.style.display = 'block';
+                                totalHashrateElement.innerHTML = "";
+                            }
+                            if (totalSharesElement) {
+                                totalSharesElement.style.display = 'block';
+                                totalSharesElement.innerHTML = "";
+                            }
                             break;
                         case State.ON:
                             gpu.manualElement.innerHTML = "Turning Off";
@@ -306,11 +314,14 @@ function checkState() {
     }
     if (numberMining == 0) return;
     if (allOff) {
+        ipcRenderer.send('stop');
         curState = State.OFF;
         document.getElementById('start').innerHTML = "Start";
         document.getElementById('stop').style.display = 'none';
         document.getElementById('start').removeAttribute('disabled');
         document.getElementById('stop').removeAttribute('disabled');
+        document.getElementById('total').style.display = 'none';
+        document.getElementById('totalShares').style.display = 'none';
     } else {
         curState = State.ON;
         document.getElementById('start').innerHTML = "Reset";
