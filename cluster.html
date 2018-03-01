@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ethereum Miner</title>
+  <link href="./css/mui.min.css" rel="stylesheet" type="text/css" />
+  <link href="./css/index.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div class="mui-container">
+    <div class="mui-panel">
+      <h1>
+        <img src='./img/ethereum.png' id='icon'>Cluster Monitor</h1>
+      <div class="mui--text-display3" id="total"></div>
+      <div class="mui--text-display2" id="totalShares"></div>
+      <h3>Add Miner to monitor</h3>
+      <div class="mui-row">
+        <div class="mui-col-md-12">
+          <div class="mui-textfield">
+            <input type="text" id="workerAddress" placeholder="http://192.168.1.5:5025">
+            <label>Address</label>
+          </div>
+          <button class="mui-btn mui-btn--primary">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class='mui-panel' id='tablePanel'>
+      <table class='mui-table mui-table--bordered' id='clusterTable'>
+      </table>
+    </div>
+    <script>
+      const { ipcRenderer } = require('electron');
+      function addWorker() {
+        let address = document.getElementById('workerAddress').value;
+        if (value == "") {
+          ipcRenderer.send('dialog', 'No address entered');
+          return;
+        }
+        ipcRenderer.send('addWorker', { address });
+      }
+      ipcRenderer.send('initClusterMonitor');
+      ipcRenderer.on('update', (event, data) => {
+        if (!data) return;
+        let { workerName, hashrate, shares } = data;
+        document.getElementById(`hashrate${workerName}`).innerHTML = hashrate;
+        document.getElementById(`shares${workerName}`).innerHTML = shares;
+      });
+      ipcRenderer.on('cluster', (event, data) => {
+        var clusterTable = `<tr><th>Worker Name</th><th>Address</th><th>Hashrate</th><th>Shares</th></tr>`;
+        if (data) {
+          for (i = 0; i < data.length; i++) {
+            let { workerName, address } = data[i];
+            clusterTable += `<tr><td>${workerName}</td><td>${address}</td><td id='hashrate${workerName}'></td><td id='shares${workerName}'></td></tr>`;
+          }
+        }
+        document.getElementById('clusterTable').innerHTML = clusterTable;
+      });
+      const mui = require('./js/mui.min.js')
+    </script>
+</body>
+
+</html>
