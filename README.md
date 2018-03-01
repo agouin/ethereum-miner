@@ -7,6 +7,7 @@
 - Hashrate and Shares monitoring of each GPU
 - Manual control of each GPU
 - Cascaded launch sequence
+- View other workers on LAN and total hashrate
 - Auto restart GPUs*
 - Auto start with program launch
 - No Donation
