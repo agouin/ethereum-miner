@@ -10,8 +10,7 @@ const AutoLaunch = require('auto-launch');
 const stripAnsi = require('strip-ansi');
 const { State } = require('./utils.js');
 
-
-const appName = (os.platform() == 'win32') ? 'EthereumMiner.exe' : (os.platform() == 'darwin') ? 'EthereumMiner.app' : 'EthereumMiner';
+const appName = (os.platform() == 'win32') ? 'ethereum-miner.exe' : (os.platform() == 'darwin') ? 'ethereum-miner.app' : 'ethereum-miner';
 var autoLauncher = new AutoLaunch({
   name: 'EthereumMiner',
   path: path.join(__dirname, appName)
@@ -27,6 +26,8 @@ if (fs.existsSync(configPath) && (file = fs.readFileSync(configPath)) != null) {
 } else {
   config = {};
 }
+
+// Config enum
 const Config = {
   WALLET: 'wallet',
   WORKER_NAME: 'workerName',
@@ -67,7 +68,6 @@ function setAutoLaunch(enabled) {
     } else if (!isEnabled && enabled) {
       autoLauncher.enable();
     }
-    autoLauncher.enable();
   }).catch(function (err) {
     console.log('error getting auto launch')
   });
