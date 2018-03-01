@@ -14,7 +14,8 @@
 
 ## To Use
 - [Download](https://github.com/agouin25/ethereum-miner/releases) and run ethereum-miner
-- Input wallet address, worker name, stratum address, choose "Mine" option for each GPU, then Start
+- Input wallet address, worker name, stratum address, choose 'Mine' option for each GPU, then Start
+- To monitor other workers, open 'Tools' menu and open the 'Cluster Monitor'
  
 For best results with AMD GPUs, download the beta blockchain drivers for [Windows](https://support.amd.com/en-us/kb-articles/Pages/Radeon-Software-Crimson-ReLive-Edition-Beta-for-Blockchain-Compute-Release-Notes.aspx) or [Ubuntu 16.04](https://support.amd.com/en-us/kb-articles/Pages/AMDGPU-Pro-Beta-Mining-Driver-for-Linux-Release-Notes.aspx)
 
