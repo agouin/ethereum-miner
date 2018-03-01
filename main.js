@@ -1,5 +1,5 @@
 const electron = require('electron')
-const { dialog, Menu, MenuItem, app } = require('electron');
+const { BrowserWindow, dialog, Menu, MenuItem, app } = require('electron');
 const fs = require('fs');
 const { spawn, execSync } = require('child_process');
 const path = require('path')
@@ -49,8 +49,6 @@ function save() {
   });
 }
 
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
 const gpus = [];
 const url = require('url')
 const ethminerInstances = [];
