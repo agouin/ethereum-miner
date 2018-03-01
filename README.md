@@ -27,4 +27,5 @@ npm start
 npm run package
 ```
 
-* Automatically restart GPUs if they hang up to 10 times at which time they are considered failed
+---
+\* Automatically restart GPUs if they hang up to 10 times at which time they are considered failed
