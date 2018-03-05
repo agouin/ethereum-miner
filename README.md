@@ -32,7 +32,7 @@
 - The Update Drivers window should now have your GPU name highlighted
 - Click 'Next'
 The driver will install for all of your AMD GPUs, and the devices may not yet be enabled due to the BIOS mods, that is okay. Don't reboot yet. If Windows crashes here with a BSOD, it probably installed, restart and go to the next step.
-- Run [atikmdag-patcher](https://www.monitortests.com/forum/Thread-AMD-ATI-Pixel-Clock-Patcher) to repatch and sign the driver to allow the modded BIOS to run
+- Run [atikmdag-patcher](https://www.monitortests.com/forum/Thread-AMD-ATI-Pixel-Clock-Patcher) to repatch and sign the driver to allow the modded BIOS to run (only required if you modded your GPU BIOS)
 - Reboot
 
 ### Optimizations
