@@ -54,7 +54,7 @@
         let hashrateElement = document.getElementById(`hashrate${workerName}`)
         if (hashrateElement) {
           let floatHashrate = parseFloat(hashrate);
-          if (!isNaN(floatHashrate)){
+          if (!isNaN(floatHashrate)) {
             hashrateElement.innerHTML = floatHashrate.toFixed(2);
           } else {
             hashrateElement.innerHTML = hashrate;
@@ -72,6 +72,7 @@
         for (i = 0; i < keys.length; i++) {
           let workerName = keys[i];
           let worker = workers[workerName];
+          if (!worker.enabled) continue;
           if (worker.hashrate && !isNaN(worker.hashrate)) total += worker.hashrate;
           if (worker.totalAccepted) totalAccepted += worker.totalAccepted;
           if (worker.totalAccepted2) totalAccepted2 += worker.totalAccepted2;
@@ -93,22 +94,34 @@
 
       function disableWorker(event) {
         if (!event || !event.target) return;
-        event.target.setAttribute('disabled', 'disabled');
+        //event.target.setAttribute('disabled', 'disabled');
         let workerName = event.target.getAttribute("workerName");
-        ipcRenderer.send('disableWorker', workerName);
-        let hashrateElement = document.getElementById(`hashrate${workerName}`)
-        if (hashrateElement) hashrateElement.innerHTML = "";
+        if (!workerName) return;
         let sharesElement = document.getElementById(`shares${workerName}`);
-        if (sharesElement) sharesElement.innerHTML = "";
-        ipcRenderer.send('disableWorker', workerName);
+        let hashrateElement = document.getElementById(`hashrate${workerName}`);
+        let monitorElement = document.getElementById(`monitor${workerName}`);
+        if (workers[workerName]) {
+          if (workers[workerName].enabled) {
+            if (hashrateElement) hashrateElement.innerHTML = "";
+            if (sharesElement) sharesElement.innerHTML = "";
+            ipcRenderer.send('disableWorker', workerName);
+            event.target.innerHTML = "Enable";
+          } else {
+            event.target.innerHTML = "Disable";
+            ipcRenderer.send('enableWorker', workerName);
+          }
+          workers[workerName].enabled = !workers[workerName].enabled
+        }
+
+
       }
 
       ipcRenderer.on('cluster', (event, data) => {
-        var clusterTable = `<tr><th>Worker Name</th><th>Address</th><th>Hashrate</th><th>Shares</th><th>Delete</th><th>Disable</th></tr>`;
+        var clusterTable = `<tr><th>Worker Name</th><th>Address</th><th>Hashrate</th><th>Shares</th><th>Delete</th><th>Monitor</th></tr>`;
         if (data) {
           for (i = 0; i < data.length; i++) {
             let { workerName, address } = data[i];
-            workers[workerName] = {};
+            workers[workerName] = { enabled: true };
             clusterTable += `<tr><td>${workerName}</td><td>${address}</td><td id='hashrate${workerName}'></td><td id='shares${workerName}'></td><td><button class="mui-btn mui-btn--danger" workerName='${workerName}' onClick="return deleteWorker(event);">Delete</button></td><td><button class="mui-btn mui-btn--primary"  workerName='${workerName}' onClick="return disableWorker(event);">Disable</button></td></tr>`;
           }
         }

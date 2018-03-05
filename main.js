@@ -110,7 +110,9 @@ api.get('/', (req, res) => {
   });
 });
 
-api.listen(5025, () => console.log('listening on port 5025'));
+api.listen(5025, () => {
+  //console.log('listening on port 5025');
+});
 
 ipcMain.on('initClusterMonitor', event => {
   ipcClusterMonitor = event.sender;
@@ -127,7 +129,8 @@ function startFetchingCluster() {
   let cluster = config[Config.CLUSTER];
   shouldFetchCluster = true;
   for (i = 0; i < cluster.length; i++) {
-    getHashrate(cluster[i].address);
+    if (cluster[i].workerName) workers[cluster[i].workerName] = {};
+    getHashrate(cluster[i].address, cluster[i].workerName);
   }
 }
 
@@ -138,59 +141,86 @@ function stopFetchingCluster() {
 var workers = {};
 var shouldFetchCluster = false;
 var addressesToStop = [];
-
-function getHashrate(address) {
+function getHashrate(address, workerName) {
   if (addressesToStop.indexOf(address) >= 0) {
     addressesToStop.splice(addressesToStop.indexOf(address), 1);
     return;
   }
   request.get({ url: address, json: true }, (err, res, body) => {
+    if (addressesToStop.indexOf(address) >= 0) {
+      addressesToStop.splice(addressesToStop.indexOf(address), 1);
+      return;
+    }
     if (err) {
-      dialog.showMessageBox({ type: 'info', message: err });
-      // scheduleNext(address);
+      workerError(workerName, err);
+      scheduleNext(address, workerName);
       return;
     }
     if (!body) {
-      dialog.showMessageBox({
-        type: 'info',
-        message: 'Data retrieved is unusable'
-      });
-      // scheduleNext(address);
+      workerError(workerName, 'Data retrieved is unusable');
+      scheduleNext(address, workerName);
       return;
     }
 
     let {
       hashrates,
       hashrate,
-      workerName,
       totalAccepted,
       totalAccepted2,
       totalRejected,
       totalRejected2,
       totalFound
     } = body;
-    if (!workerName) {
-      scheduleNext(address);
+    if (!body.workerName) {
+      workerError(workerName, `Worker name not received from ${address}`);
+      scheduleNext(address, workerName);
       return;
+    } else {
+      workerName = body.workerName;
     }
     body.address = address;
     workers[workerName] = body;
+
+    if (ipcClusterMonitor)
+      ipcClusterMonitor.send('update', workers[workerName]);
+
     if (addressesToStop.indexOf(address) >= 0) {
       addressesToStop.splice(addressesToStop.indexOf(address), 1);
       return;
     }
-    if (ipcClusterMonitor)
-      ipcClusterMonitor.send('update', workers[workerName]);
-    scheduleNext(address);
+    workers[workerName].dialogShown = false;
+    scheduleNext(address, workerName);
   });
 }
 
-function scheduleNext(address) {
+function workerError(workerName, message) {
+  //console.log('worker error', workerName, message);
+  if (workerName && workers[workerName]) {
+    if (!workers[workerName].dialogShown) {
+      let now = new Date();
+      dialog.showMessageBox(
+        {
+          type: 'warning',
+          message: `${now.toLocaleDateString()} ${now.toLocaleTimeString()} ${message}`
+        },
+        () => {
+          workers[workerName].dialogShown = false;
+        }
+      );
+      workers[workerName].dialogShown = true;
+    }
+    workers[workerName].hashrate = 0;
+    if (ipcClusterMonitor)
+      ipcClusterMonitor.send('update', workers[workerName]);
+  }
+}
+
+function scheduleNext(address, workerName) {
   if (shouldFetchCluster) {
     let index = addressesToStop.indexOf(address);
     if (index == -1) {
-      setTimeout(() => {
-        getHashrate(address);
+      workers[workerName].hashrateTimeout = setTimeout(() => {
+        getHashrate(address, workerName);
       }, 2000);
     } else {
       addressesToStop.splice(index, 1);
@@ -205,14 +235,14 @@ ipcMain.on('addWorker', (event, data) => {
   request.get({ url: address, json: true }, (err, res, body) => {
     if (err) {
       dialog.showMessageBox({
-        type: 'info',
+        type: 'error',
         message: `${address} is not available, can't add`
       });
       return;
     }
     if (!body) {
       dialog.showMessageBox({
-        type: 'info',
+        type: 'error',
         message: `${address} is available but not giving any data, can't add`
       });
       return;
@@ -220,14 +250,15 @@ ipcMain.on('addWorker', (event, data) => {
     let { workerName } = body;
     if (!workerName) {
       dialog.showMessageBox({
-        type: 'info',
+        type: 'error',
         message: `${address} has no worker name`
       });
       return;
     }
     config[Config.CLUSTER].push({ address, workerName });
     save();
-    getHashrate(address);
+    workers[workerName] = {};
+    getHashrate(address, workerName);
     if (ipcClusterMonitor)
       ipcClusterMonitor.send('cluster', config[Config.CLUSTER]);
   });
@@ -255,14 +286,26 @@ ipcMain.on('disableWorker', (event, workerName) => {
   for (i = 0; i < config[Config.CLUSTER].length; i++) {
     let worker = config[Config.CLUSTER][i];
     if (worker.workerName == workerName) {
+      if (workers[workerName] && workers[workerName].hashrateTimeout)
+        clearTimeout(workers[workerName].hashrateTimeout);
       if (addressesToStop.indexOf(worker.address) == -1)
         addressesToStop.push(worker.address);
     }
   }
 });
 
+ipcMain.on('enableWorker', (event, workerName) => {
+  if (!workerName) return;
+  for (i = 0; i < config[Config.CLUSTER].length; i++) {
+    let worker = config[Config.CLUSTER][i];
+    if (worker.workerName == workerName) {
+      getHashrate(worker.address, workerName);
+    }
+  }
+});
+
 function save() {
-  fs.writeFile(configPath, JSON.stringify(config), function (err) {
+  fs.writeFile(configPath, JSON.stringify(config), function(err) {
     if (err) {
       console.log('error saving config');
     } else {
@@ -274,14 +317,14 @@ function save() {
 function setAutoLaunch(enabled) {
   autoLauncher
     .isEnabled()
-    .then(function (isEnabled) {
+    .then(function(isEnabled) {
       if (isEnabled && !enabled) {
         autoLauncher.disable();
       } else if (!isEnabled && enabled) {
         autoLauncher.enable();
       }
     })
-    .catch(function (err) {
+    .catch(function(err) {
       console.log('error getting auto launch');
     });
 }
@@ -438,7 +481,7 @@ ipcMain.on('start', (event, data) => {
         if (mine) {
           initializeEthminerInstances(platformID, deviceID);
           ethminerInstances[platformID][deviceID].startTimeout = setTimeout(
-            function () {
+            function() {
               startMining(platformID, deviceID, deviceName, mine);
             },
             count * 20000 + 500
@@ -512,7 +555,7 @@ async function restartInstance(platformID, deviceID) {
     await instance.kill('SIGTERM');
     delete ethminerInstance.instance;
   }
-  setTimeout(function () {
+  setTimeout(function() {
     startMining(platformID, deviceID, deviceName, mine);
   }, 2000);
 }
@@ -542,7 +585,7 @@ function broadcastHashrate() {
     incrementHashrateInstance();
     return;
   }
-  let { hashrate, shares } = ethminerInstance;
+  let { hashrate, shares, instance } = ethminerInstance;
   if (hashrate && ipcRenderer) {
     //console.log(`broadcasted hashrate for platformID: ${lastPlatformID}, deviceID: ${lastDeviceID}, hashrate: ${hashrate}, shares: ${shares}`);
     ipcRenderer.send('hashrate', {
@@ -686,6 +729,13 @@ function startMining(platformID, deviceID, deviceName, mine) {
   ethminerInstance.on('close', code => {
     if (shouldKill) return;
     //console.log(`ethminer instance closed with code ${code}`);
+    if (
+      platformID < ethminerInstances.length &&
+      deviceID < ethminerInstances[platformID].length
+    ) {
+      ethminerInstances[platformID][deviceID].hashrate = 0;
+      delete ethminerInstances[platformID][deviceID].instance;
+    }
     if (ipcRenderer)
       ipcRenderer.send('state', {
         platformID,
@@ -770,9 +820,9 @@ function createWindow() {
   let iconPath = path.resolve(
     __dirname,
     `./img/ethereum.${
-    os.platform() == 'win32'
-      ? 'ico'
-      : os.platform() == 'darwin' ? 'icns' : 'png'
+      os.platform() == 'win32'
+        ? 'ico'
+        : os.platform() == 'darwin' ? 'icns' : 'png'
     }`
   );
   // console.log('icon path', iconPath);
@@ -825,7 +875,7 @@ function createWindow() {
         {
           label: 'Quit',
           accelerator: 'Command+Q',
-          click: function () {
+          click: function() {
             app.quit();
           }
         }
@@ -840,16 +890,18 @@ function createWindow() {
           accelerator: 'CmdOrCtrl+D',
           click() {
             let clusterMonitor = new BrowserWindow({
-              width: 800,
+              width: 1200,
               height: 600,
               icon: iconPath
             });
             clusterMonitor.setMenu(Menu.buildFromTemplate([editMenu]));
-            clusterMonitor.loadURL(url.format({
-              pathname: path.join(__dirname, 'cluster.html'),
-              protocol: 'file:',
-              slashes: true
-            }));
+            clusterMonitor.loadURL(
+              url.format({
+                pathname: path.join(__dirname, 'cluster.html'),
+                protocol: 'file:',
+                slashes: true
+              })
+            );
             //clusterMonitor.webContents.openDevTools();
             clusterMonitor.on('closed', () => {
               stopFetchingCluster();
@@ -890,7 +942,7 @@ function createWindow() {
   //mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', function () {
+  mainWindow.on('closed', function() {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
@@ -901,13 +953,13 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', function () {
+app.on('ready', function() {
   createWindow();
   listDevices();
 });
 
 // Quit when all windows are closed.
-app.on('window-all-closed', async function () {
+app.on('window-all-closed', async function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== 'darwin') {
@@ -917,7 +969,7 @@ app.on('window-all-closed', async function () {
   //}
 });
 
-app.on('activate', function () {
+app.on('activate', function() {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
