@@ -13,7 +13,7 @@
 - No Donation
 
 ## To Use
-- **[Download](https://github.com/agouin25/ethereum-miner/releases) and run ethereum-miner**
+- **[Download](https://github.com/agouin/ethereum-miner/releases) and run ethereum-miner**
 - Input wallet address, worker name, stratum address, choose 'Mine' option for each GPU, then Start
 - To monitor other workers, open 'Tools' menu and open the 'Cluster Monitor'
  
@@ -35,7 +35,7 @@ The driver will install for all of your AMD GPUs, and the devices may not yet be
 - Run [atikmdag-patcher](https://www.monitortests.com/forum/Thread-AMD-ATI-Pixel-Clock-Patcher) to repatch and sign the driver to allow the modded BIOS to run
 - Reboot
 
-### Optimizations 
+### Optimizations
 #### Windows
 - [MSI Afterburner](https://www.msi.com/page/afterburner) is an easy way overclock the memory clocks for both AMD and NVIDIA cards. You can also limit your power consumption. 
 - On AMD cards, the combo of blockchain drivers, timing straps BIOS flash, and MSI Afterburner will provide the largest hashrate gains.
