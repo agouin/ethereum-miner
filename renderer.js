@@ -197,8 +197,10 @@ function addToShares(platformID, deviceID, shares) {
       totalFound += parseInt(split[2].replace('F', ''));
     }
   }
-  if (totalSharesElement)
+  if (totalSharesElement) {
+    totalSharesElement.display = 'block';
     totalSharesElement.innerHTML = `A${totalAccepted}+${totalAccepted2}:R${totalRejected}+${totalRejected2}:F${totalFound}`;
+  }
 }
 
 function calculateTotalHashrate() {
@@ -216,10 +218,12 @@ function calculateTotalHashrate() {
     }
   }
   let hashrate = round(total, 2).toFixed(2);
-  if (totalHashrateElement)
+  if (totalHashrateElement) {
+    totalHashrateElement.display = 'block';
     totalHashrateElement.innerHTML = `${
       isNaN(hashrate) ? '0.00' : `${hashrate} Mh/s`
     }`;
+  }
 }
 
 ipcRenderer.on('hashrate', (event, stats) => {
