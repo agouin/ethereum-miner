@@ -8,7 +8,7 @@
     "package":
       "electron-packager . ethereum-miner --overwrite --icon=./img/ethereum"
   },
-  "repository": "https://github.com/agouin25/ethereum-miner",
+  "repository": "https://github.com/agouin/ethereum-miner",
   "keywords": [
     "ethminer",
     "ethereum",
@@ -19,7 +19,7 @@
     "program",
     "app"
   ],
-  "author": "agouin25",
+  "author": "agouin",
   "license": "GNU GPL 3.0",
   "devDependencies": {},
   "dependencies": {
