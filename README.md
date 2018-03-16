@@ -46,10 +46,9 @@ The driver will install for all of your AMD GPUs, and the devices may not yet be
 
 #### Ubuntu
 - NVIDIA
-  - /etc/X11/xorg.conf
+  - /etc/X11/xorg.conf (example file provided)
     - To allow overclocking, include `Option "Coolbits" "28"` for your NVIDIA devices
     - When a monitor is not plugged in to a device, make sure that you are using the `Option "AllowEmptyInitialConfiguration" "true"` for the device and ensure that the screens are declared in the `Section "ServerLayout"`
-    - Example xorg.conf file provided
   - Use nvidia-settings to overclock
     ```bash
     # Example for GTX 1060
@@ -62,14 +61,14 @@ The driver will install for all of your AMD GPUs, and the devices may not yet be
 #### Overclocking
 There has been reported success with the following overclocks. For AMD, the clocks can be set with an overclocking tool like MSI Afterburner or by flashing the BIOS. For NVIDIA, the BIOS is encrypted so cannot be easily flashed to overclock, so a tool like MSI Afterburner or nvidia-settings should be used.
 
-| Device | Memory Rate (MHz) |
-| --- | --- |
-| AMD RX 580 | 2050 |
-| AMD RX 570 | 2000 |
-| AMD RX 560 | 1750 |
-| NVIDIA GTX 1080 | +600 |
-| NVIDIA GTX 1070 | +550 |
-| NVIDIA GTX 1060 | +500 |
+| Device           | Memory Rate (MHz) | Hashrate (Mh/s) |
+| ---------------- | ----------------- | ----- |
+| AMD RX 580       | 2050              | 28.3  |
+| AMD RX 570       | 2000              | 27.6  |
+| AMD RX 560       | 1750              | 11.4  |
+| NVIDIA GTX 1080  | +600              | 35.5  |
+| NVIDIA GTX 1070  | +550              | 30.5  |
+| NVIDIA GTX 1060  | +500              | 22.8  |
 
 ## To Build
 
