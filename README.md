@@ -45,8 +45,30 @@ The driver will install for all of your AMD GPUs, and the devices may not yet be
   - Flash GPU BIOS with ATIFlash
 
 #### Ubuntu
-- For NVIDIA cards you can use tools like nvidia-settings to overclock
-- For AMD cards, use Windows and MSI Afterburner to find good clock/power settings for your BIOS, set those into Polaris Bios Editor, modify the timing straps, save the BIOS, and then flash the BIOS to the GPU as described above to have the settings all carry over to Ubuntu. Ubuntu has slightly(<5%) higher hashrates for AMD cards compared to Windows.
+- NVIDIA
+  - /etc/X11/xorg.conf (example file provided)
+    - To allow overclocking, include `Option "Coolbits" "28"` for your NVIDIA devices
+    - When a monitor is not plugged in to a device, make sure that you are using the `Option "AllowEmptyInitialConfiguration" "true"` for the device and ensure that the screens are declared in the `Section "ServerLayout"`
+  - Use nvidia-settings to overclock
+    ```bash
+    # Example for GTX 1060
+    nvidia-settings -a '[gpu:0]/GPUMemoryTransferRateOffset[3]=1000'`
+    ```
+- AMD
+  - Use Windows and MSI Afterburner to find good clock/power/straps settings for your BIOS (perform all Windows optimizations above)
+  - Once the GPU BIOS is flashed, it will work in any Operating System, so the settings all carry over to Ubuntu. Ubuntu has slightly(<5%) higher hashrates for AMD cards compared to Windows in my experience.
+
+#### Overclocking
+There has been reported success with the following overclocks. For AMD, the clocks can be set with an overclocking tool like MSI Afterburner or by flashing the BIOS. For NVIDIA, the BIOS is encrypted so cannot be easily flashed to overclock, so a tool like MSI Afterburner or nvidia-settings should be used.
+
+| Device           | Memory Rate (MHz) | Hashrate (Mh/s) |
+| ---------------- | ----------------- | ----- |
+| AMD RX 580       | 2050              | 28.3  |
+| AMD RX 570       | 2000              | 27.6  |
+| AMD RX 560       | 1750              | 11.4  |
+| NVIDIA GTX 1080  | +600              | 35.5  |
+| NVIDIA GTX 1070  | +550              | 30.5  |
+| NVIDIA GTX 1060  | +500              | 22.8  |
 
 ## To Build
 
