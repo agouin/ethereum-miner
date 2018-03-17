@@ -5,8 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "package":
-      "electron-packager . ethereum-miner --overwrite --icon=./img/ethereum"
+    "package": "electron-packager . ethereum-miner --overwrite --icon=./img/ethereum"
   },
   "repository": "https://github.com/agouin/ethereum-miner",
   "keywords": [
@@ -29,8 +28,6 @@
     "electron-packager": "^10.1.1",
     "express": "^4.16.2",
     "home-path": "^1.0.5",
-    "node": "^9.8.0",
-    "npm": "^5.7.1",
     "request": "^2.83.0",
     "strip-ansi": "^4.0.0",
     "util.promisify": "^1.0.0"
