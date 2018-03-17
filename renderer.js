@@ -7,6 +7,7 @@ var totalSharesElement;
 
 const { ipcRenderer } = require('electron');
 var autoStart;
+
 function getSelect(id) {
   return `
     <div class='mui-select'>
@@ -17,9 +18,19 @@ function getSelect(id) {
       </select>
     </div>`;
 }
+
 function round(value, decimals) {
   return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
 }
+
+ipcRenderer.on('failed', (event, data) => {
+  let { deviceID, platformID } = data;
+  if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
+  let gpu = gpus[platformID][deviceID];
+  if (!gpu.hashrateElement) return;
+  gpu.hashrateElement.innerHTML = 'Failure';
+  gpu.restarting = false;
+});
 
 ipcRenderer.on('restarted', (event, data) => {
   let { deviceID, platformID, restartCount } = data;
@@ -29,6 +40,7 @@ ipcRenderer.on('restarted', (event, data) => {
   gpu.hashrateElement.innerHTML = 'Restarting';
   if (!gpu.restartsElement) return;
   gpu.restartsElement.innerHTML = `${restartCount}`;
+  gpu.restarting = true;
 });
 
 ipcRenderer.on('init', (event, data) => {
@@ -142,7 +154,10 @@ ipcRenderer.on('init', (event, data) => {
               }
               break;
             case State.ON:
-              gpu.manualElement.innerHTML = 'Turning Off';
+              if (gpu.manualElement)
+                gpu.manualElement.innerHTML = 'Turning Off';
+              if (gpu.hashrateElement) gpu.hashrateElement.innerHTML = '';
+              if (gpu.lastElement) gpu.lastElement.innerHTML = '';
               ipcRenderer.send('off', { platformID, deviceID });
               break;
           }
@@ -233,10 +248,13 @@ ipcRenderer.on('hashrate', (event, stats) => {
     gpus[stats.platformID].push({});
   let gpu = gpus[stats.platformID][stats.deviceID];
   if (stats.hashrate != 0 && gpu.hashrateElement)
-    if (!isNaN(stats.hashrate))
+    if (!isNaN(stats.hashrate)) {
+      gpu.restarting = false;
       gpu.hashrateElement.innerHTML =
         round(stats.hashrate, 2).toFixed(2) + ' Mh/s';
-    else gpu.hashrateElement.innerHTML = stats.hashrate;
+    } else {
+      gpu.hashrateElement.innerHTML = stats.hashrate;
+    }
   gpu.lastActivity = new Date();
   if (gpu.lastElement)
     gpu.lastElement.innerHTML = gpu.lastActivity.toLocaleString();
@@ -299,7 +317,8 @@ function start() {
   //curState = State.ON;
 }
 
-ipcRenderer.on('state', function(event, data) {
+ipcRenderer.on('state', (event, data) => {
+  //console.log('received state');
   let { platformID, deviceID, nextState, message } = data;
   if (platformID >= gpus.length || deviceID >= gpus[platformID].length) return;
   let gpu = gpus[platformID][deviceID];
@@ -316,6 +335,9 @@ ipcRenderer.on('state', function(event, data) {
         break;
       case State.OFF:
         gpu.state = State.ON;
+        gpu.restarting = false;
+        if (gpu.lastElement)
+          gpu.lastElement.innerHTML = new Date().toLocaleString();
         if (gpu.hashrateElement) gpu.hashrateElement.innerHTML = 'Launching';
         gpu.manualElement.classList.remove('mui-btn--primary');
         gpu.manualElement.classList.add('mui-btn--danger');
@@ -334,12 +356,12 @@ function checkState() {
       let gpu = gpus[i][j];
       if (!gpu.mine) continue;
       numberMining++;
-      if (gpu.state == State.ON) allOff = false;
+      if (gpu.state == State.ON || gpu.restarting) allOff = false;
     }
   }
   if (numberMining == 0) return;
   if (allOff) {
-    ipcRenderer.send('stop');
+    if (curState == State.ON) ipcRenderer.send('stop');
     curState = State.OFF;
     document.getElementById('start').innerHTML = 'Start';
     document.getElementById('stop').style.display = 'none';
