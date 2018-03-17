@@ -79,11 +79,12 @@ api.get('/', (req, res) => {
     for (j = 0; j < ethminerInstances[i].length; j++) {
       hashrates[i].push({});
       let ethminerInstance = ethminerInstances[i][j];
-      let { hashrate, shares } = ethminerInstance;
+      let { hashrate, shares, name } = ethminerInstance;
       hashrates[i][j].hashrate = hashrate;
       let floatHashrate = parseFloat(hashrate);
       if (!isNaN(floatHashrate)) totalHashrate += floatHashrate;
       hashrates[i][j].shares = shares;
+      hashrates[i][j].name = name || `platform: ${i}, device: ${j}`;
       if (!shares) continue;
       let split = shares.split(':');
       if (split.length != 3) continue;
@@ -752,6 +753,7 @@ function startMining(platformID, deviceID, deviceName, mine) {
     lastActivity: Date.now(),
     platformID,
     deviceID,
+    name: deviceName,
     restartCount: 0,
     hashrate: 0
   };
