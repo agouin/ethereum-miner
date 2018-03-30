@@ -24,7 +24,7 @@
   "dependencies": {
     "auto-launch": "^5.0.5",
     "body-parser": "^1.18.2",
-    "electron": "^1.8.2",
+    "electron": "^1.8.4",
     "electron-packager": "^10.1.1",
     "express": "^4.16.2",
     "home-path": "^1.0.5",
