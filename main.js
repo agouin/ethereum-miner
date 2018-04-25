@@ -15,7 +15,9 @@ const os = require('os');
 const ethminerName =
   os.platform() == 'win32'
     ? 'ethminer.exe'
-    : os.platform() == 'darwin' ? 'ethminerdarwin' : 'ethminerlinux';
+    : os.platform() == 'darwin'
+      ? 'ethminerdarwin'
+      : 'ethminerlinux';
 const ethminer = path.join(__dirname, ethminerName);
 const AutoLaunch = require('auto-launch');
 const stripAnsi = require('strip-ansi');
@@ -25,7 +27,9 @@ const { State } = require('./utils.js');
 const appName =
   os.platform() == 'win32'
     ? 'ethereum-miner.exe'
-    : os.platform() == 'darwin' ? 'ethereum-miner.app' : 'ethereum-miner';
+    : os.platform() == 'darwin'
+      ? 'ethereum-miner.app'
+      : 'ethereum-miner';
 var autoLauncher = new AutoLaunch({
   name: 'EthereumMiner',
   path: app.getPath('exe')
@@ -80,6 +84,7 @@ api.get('/', (req, res) => {
       hashrates[i].push({});
       let ethminerInstance = ethminerInstances[i][j];
       let { hashrate, shares, name } = ethminerInstance;
+      if (!name) name = gpus[i][j].deviceName;
       hashrates[i][j].hashrate = hashrate;
       let floatHashrate = parseFloat(hashrate);
       if (!isNaN(floatHashrate)) totalHashrate += floatHashrate;
@@ -712,6 +717,10 @@ function startMining(platformID, deviceID, deviceName, mine) {
         platformID,
         '--opencl-devices',
         deviceID
+        // "--cl-local-work",
+        // 256,
+        // "--cl-global-work",
+        // 131072
       );
       break;
   }
@@ -856,7 +865,9 @@ function createWindow() {
     `./img/ethereum.${
       os.platform() == 'win32'
         ? 'ico'
-        : os.platform() == 'darwin' ? 'icns' : 'png'
+        : os.platform() == 'darwin'
+          ? 'icns'
+          : 'png'
     }`
   );
   // console.log('icon path', iconPath);
