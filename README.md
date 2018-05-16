@@ -13,10 +13,13 @@
 - No Donation
 
 ## To Use
+- Download [Microsoft C++ Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=48145)
 - **[Download](https://github.com/agouin/ethereum-miner/releases) and run ethereum-miner**
 - Input wallet address, worker name, stratum address, choose 'Mine' option for each GPU, then Start
 - To monitor other workers, open 'Tools' menu and open the 'Cluster Monitor'
- 
+
+***You should now be mining. To get a faster hashrate, continue on***
+
 #### For best results with AMD GPUs, download the beta blockchain drivers for [Windows](https://support.amd.com/en-us/kb-articles/Pages/Radeon-Software-Crimson-ReLive-Edition-Beta-for-Blockchain-Compute-Release-Notes.aspx) or [Ubuntu 16.04](https://support.amd.com/en-us/kb-articles/Pages/AMDGPU-Pro-Beta-Mining-Driver-for-Linux-Release-Notes.aspx). 
 ### Install the AMD Blockchain driver 
 ***On Windows, every time the GPU configuration is changed, even one card added/removed, it will likely install the default driver for all of your cards. Every time this happens you will need to go through these steps***
