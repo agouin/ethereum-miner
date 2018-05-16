@@ -36,9 +36,10 @@ The driver will install for all of your AMD GPUs, and the devices may not yet be
 - Reboot
 
 ### Optimizations
+These steps are not required, but will increase your hashrate
 #### Windows
 - [MSI Afterburner](https://www.msi.com/page/afterburner) is an easy way overclock the memory clocks for both AMD and NVIDIA cards. You can also limit your power consumption. 
-- On AMD cards, the combo of blockchain drivers, timing straps BIOS flash, and MSI Afterburner will provide the largest hashrate gains.
+- For AMD cards, the combo of blockchain drivers, timing straps BIOS flash, and overclocking will provide the largest hashrate gains.
 - For AMD Radeon RX 4XX/RX 5XX/Radeon Pro Duo Polaris/etc:
   - Backup stock GPU BIOS with [ATIFlash](https://www.techpowerup.com/download/ati-atiflash/)
   - Modify timing straps, clocks, and power using [PolarisBiosEditor](https://github.com/jaschaknack/PolarisBiosEditor)
